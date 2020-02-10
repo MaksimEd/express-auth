@@ -1,8 +1,6 @@
 const jwt = require('jsonwebtoken');
+const { JWTAccessSecret, JWTRefreshSecret } = require('../../../configs/JWT');
 const Users = require('./modelsAuthentication');
-
-const JWTAccessSecret = 'secret';
-const JWTRefreshSecret = 'secret-refresh';
 
 const getTokensForUser = (user) => {
   const accessToken = jwt.sign(user, JWTAccessSecret, { expiresIn: '3h' });
