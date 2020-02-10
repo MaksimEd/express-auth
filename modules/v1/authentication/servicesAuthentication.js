@@ -1,25 +1,30 @@
 const jwt = require('jsonwebtoken');
 const Users = require('./modelsAuthentication');
 
+const JWTAccessSecret = 'secret';
+const JWTRefreshSecret = 'secret-refresh';
+
+const getTokensForUser = (user) => {
+  const accessToken = jwt.sign(user, JWTAccessSecret, { expiresIn: '3h' });
+  const refreshToken = jwt.sign(user, JWTRefreshSecret);
+  return { accessToken, refreshToken };
+}
+
 const login = (username, password) => {
   const user = Users.find(u => u.username === username && u.password === password);
   if (user === undefined) {
     return Promise.reject('not found user');
   }
-  const accessToken = jwt.sign(user, 'secret', { expiresIn: '3h' });
-  const refreshToken = jwt.sign(user, 'secret-refresh');
-  return Promise.resolve({ accessToken, refreshToken });
+  return Promise.resolve(getTokensForUser(user));
 };
 
 const refreshToken = (refreshToken) => new Promise((resolve, reject) => {
-  jwt.verify(refreshToken, 'secret-refresh', (err, decoded) => {
+  jwt.verify(refreshToken, JWTRefreshSecret, (err, decoded) => {
     if (err) return reject(err);
-    const user = Users.find(u => u.username === decoded.username && u.password === decoded.password);
+    const user = Users.find(u => u.id === decoded.id);
     if (user === undefined) return reject('not found user');
 
-    const accessToken = jwt.sign(user, 'secret', { expiresIn: '3h' });
-    const refreshToken = jwt.sign(user, 'secret-refresh');
-    resolve({ accessToken, refreshToken });
+    resolve(getTokensForUser(user));
   });
 });
 

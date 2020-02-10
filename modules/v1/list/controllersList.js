@@ -5,7 +5,7 @@ const route = Router();
 
 route.get('/', async (_, res) => {
   getList().then(
-    () => res.send(response),
+    (response) => res.send(response),
     () => res.statusCode(500)
   );
 });
